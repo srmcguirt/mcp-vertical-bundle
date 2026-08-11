@@ -175,7 +175,7 @@ export async function handler(
       `Created: ${db.created_time} | Last edited: ${db.last_edited_time}\n` +
       `\nProperties (${formattedProperties.length}):\n\n` +
       formattedProperties
-        .map((p) => {
+        .map((p: any) => {
           let entry = `  **${p.key}** (${p.type})`;
           if (p.options) {
             const opts = p.options as Array<{ name: string }>;

@@ -12,6 +12,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@notionhq/client": "^2.2.15",
+    "dotenv": "^16.4.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {

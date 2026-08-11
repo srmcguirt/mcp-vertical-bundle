@@ -3,7 +3,44 @@
  */
 
 import { z } from 'zod';
-import type { WebClient } from '@slack/web-api';
+import { WebClient } from '@slack/web-api';
+
+export const toolDefinition = {
+  name: "slack_list_users",
+  description:
+    "List users in the Slack workspace. " +
+    "Returns user metadata including name, email, title, admin status, and timezone. " +
+    "Filters out bots and deleted users. Supports pagination via cursor.",
+  inputSchema: {
+    type: "object" as const,
+    properties: {
+      limit: {
+        type: "number",
+        description: "Max users to return (1-200). Default: 50.",
+        minimum: 1,
+        maximum: 200,
+      },
+      cursor: {
+        type: "string",
+        description: "Pagination cursor from previous response.",
+      },
+      include_locale: {
+        type: "boolean",
+        description: "Include locale info. Default: false.",
+      },
+    },
+    required: [],
+  },
+};
+
+export async function handler(
+  client: WebClient,
+  args: Record<string, unknown>,
+): Promise<{ content: [{ type: "text"; text: string }] }> {
+  const parsed = listUsersSchema.parse(args);
+  const result = await listUsers(client, parsed);
+  return { content: [{ type: "text", text: result }] };
+}
 
 export const listUsersSchema = z.object({
   limit: z.number().min(1).max(200).default(50).describe('Max users to return'),

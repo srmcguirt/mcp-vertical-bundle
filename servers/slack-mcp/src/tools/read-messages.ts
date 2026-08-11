@@ -3,7 +3,52 @@
  */
 
 import { z } from 'zod';
-import type { WebClient } from '@slack/web-api';
+import { WebClient } from '@slack/web-api';
+
+export const toolDefinition = {
+  name: "slack_read_messages",
+  description:
+    "Read recent messages from a Slack channel. " +
+    "Returns message text, user, timestamps, reactions, and optionally thread replies. " +
+    "Supports time-range filtering via oldest/latest parameters.",
+  inputSchema: {
+    type: "object" as const,
+    properties: {
+      channel: {
+        type: "string",
+        description: "Channel ID (e.g., C0123456789).",
+      },
+      limit: {
+        type: "number",
+        description: "Number of messages to return (1-100). Default: 20.",
+        minimum: 1,
+        maximum: 100,
+      },
+      oldest: {
+        type: "string",
+        description: "Unix timestamp — only messages after this time.",
+      },
+      latest: {
+        type: "string",
+        description: "Unix timestamp — only messages before this time.",
+      },
+      include_replies: {
+        type: "boolean",
+        description: "Include thread replies for each message. Default: false.",
+      },
+    },
+    required: ["channel"],
+  },
+};
+
+export async function handler(
+  client: WebClient,
+  args: Record<string, unknown>,
+): Promise<{ content: [{ type: "text"; text: string }] }> {
+  const parsed = readMessagesSchema.parse(args);
+  const result = await readMessages(client, parsed);
+  return { content: [{ type: "text", text: result }] };
+}
 
 export const readMessagesSchema = z.object({
   channel: z.string().describe('Channel ID (e.g., C0123456789)'),
