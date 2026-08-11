@@ -1,0 +1,23 @@
+{
+  "name": "@wireforge/mcp-vertical-bundle",
+  "version": "1.0.0",
+  "description": "WireForge MCP Vertical Server Bundle — production-ready MCP servers for GitHub, Slack, and Notion",
+  "author": "WireForge",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "servers/github-mcp",
+    "servers/slack-mcp",
+    "servers/notion-mcp"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:github": "npm run build --workspace=servers/github-mcp",
+    "build:slack": "npm run build --workspace=servers/slack-mcp",
+    "build:notion": "npm run build --workspace=servers/notion-mcp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/srmcguirt/mcp-vertical-bundle"
+  }
+}

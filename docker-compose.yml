@@ -1,0 +1,47 @@
+# Note: MCP servers communicate via stdio, not HTTP.
+# This compose file is for building and testing the servers.
+# For production use with Claude Desktop/Cursor/Cline, run servers directly via npx/node.
+
+services:
+  github-mcp:
+    build:
+      context: ./servers/github-mcp
+      dockerfile: Dockerfile
+    container_name: wireforge-github-mcp
+    env_file:
+      - ./servers/github-mcp/.env
+    volumes:
+      - ./servers/github-mcp:/app
+      - /app/node_modules
+
+  slack-mcp:
+    build:
+      context: ./servers/slack-mcp
+      dockerfile: Dockerfile
+    container_name: wireforge-slack-mcp
+    env_file:
+      - ./servers/slack-mcp/.env
+    volumes:
+      - ./servers/slack-mcp:/app
+      - /app/node_modules
+
+  notion-mcp:
+    build:
+      context: ./servers/notion-mcp
+      dockerfile: Dockerfile
+    container_name: wireforge-notion-mcp
+    env_file:
+      - ./servers/notion-mcp/.env
+    volumes:
+      - ./servers/notion-mcp:/app
+      - /app/node_modules
+
+# Each server's Dockerfile should follow this pattern:
+#
+#   FROM node:22-alpine
+#   WORKDIR /app
+#   COPY package*.json ./
+#   RUN npm install
+#   COPY . .
+#   RUN npm run build
+#   CMD ["npm", "start"]
