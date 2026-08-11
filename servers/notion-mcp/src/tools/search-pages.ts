@@ -53,14 +53,15 @@ export async function searchPages(notion: Client, input: SearchPagesInput): Prom
         parent_type: page.parent.type,
       };
     } else {
-      const db = result as Extract<typeof result, { object: 'database' }>;
+      // Cast to any to handle Notion SDK's complex union types
+      const db = result as any;
       return {
-        object: 'database',
-        id: db.id,
-        title: db.title?.map(t => t.plain_text).join('') || 'Untitled',
-        url: db.url,
-        created_time: db.created_time,
-        last_edited_time: db.last_edited_time,
+        object: 'database' as const,
+        id: db.id as string,
+        title: db.title?.map((t: any) => t.plain_text).join('') || 'Untitled',
+        url: db.url as string,
+        created_time: db.created_time as string,
+        last_edited_time: db.last_edited_time as string,
       };
     }
   });
