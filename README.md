@@ -1,8 +1,6 @@
 # @wireforge/mcp-vertical-bundle
 
-[![Premium](https://img.shields.io/badge/WireForge-Premium-6366f1?style=flat-square)](https://srmcguirt.gumroad.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=flat-square)](https://www.typescriptlang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white) ![Node](https://img.shields.io/badge/Node-%3E%3D18-339933?logo=node.js&logoColor=white) ![MCP](https://img.shields.io/badge/MCP-Compatible-8A2BE2) ![Servers](https://img.shields.io/badge/Servers-3-green)
 
 3 production-ready MCP servers that connect Claude, Cursor, and any MCP client to **GitHub**, **Slack**, and **Notion** -- ready to deploy in under 5 minutes.
 
