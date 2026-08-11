@@ -1,29 +1,24 @@
 {
-  "name": "@wireforge/mcp-notion",
+  "name": "@wireforge/notion-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Notion — search pages, read databases, create pages, query databases",
-  "author": "WireForge",
-  "license": "MIT",
+  "description": "MCP server for Notion — pages, databases, search, create",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsc --watch"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "@notionhq/client": "^2.3.0",
-    "zod": "^3.24.5",
-    "dotenv": "^16.5.0"
+    "@notionhq/client": "^2.2.15",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "tsx": "^4.19.4",
-    "@types/node": "^22.15.21"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/srmcguirt/mcp-vertical-bundle"
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

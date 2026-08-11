@@ -1,81 +1,118 @@
-# WireForge MCP Vertical Server Bundle
+# @wireforge/mcp-vertical-bundle
 
-**Three production-ready MCP servers. Drop-in ready for Claude Desktop, Cursor, and Cline.**
+[![Premium](https://img.shields.io/badge/WireForge-Premium-6366f1?style=flat-square)](https://srmcguirt.gumroad.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=flat-square)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](./LICENSE)
 
-The WireForge MCP Vertical Server Bundle gives you fully typed, validated, and documented Model Context Protocol servers for the three platforms your team uses every day: GitHub, Slack, and Notion. Each server is built with TypeScript, validated with Zod, and designed to work out of the box with any MCP-compatible client.
-
-No boilerplate. No guesswork. Install, configure your API tokens, and start using AI-powered workflows across your entire stack.
-
----
-
-## Architecture
+3 production-ready MCP servers that connect Claude, Cursor, and any MCP client to **GitHub**, **Slack**, and **Notion** -- ready to deploy in under 5 minutes.
 
 ```
-+------------------------------------------------------------------+
-|                        MCP Client                                |
-|              (Claude Desktop / Cursor / Cline)                   |
-+----------+-------------------+-------------------+---------------+
-           |                   |                   |
-         stdio               stdio               stdio
-           |                   |                   |
-+----------v------+  +--------v--------+  +-------v---------+
-|  GitHub MCP     |  |  Slack MCP      |  |  Notion MCP     |
-|  Server         |  |  Server         |  |  Server         |
-|                 |  |                 |  |                 |
-|  - list_repos   |  |  - search       |  |  - search_pages |
-|  - search_issues|  |    _channels    |  |  - read_database|
-|  - read_pr      |  |  - read_messages|  |  - create_page  |
-|  - create_issue |  |  - post_message |  |  - query        |
-|                 |  |  - list_users   |  |    _database    |
-+---------+-------+  +--------+--------+  +--------+--------+
-          |                    |                    |
-          v                    v                    v
-     GitHub API           Slack API           Notion API
+┌─────────────────────────────────────────────────────────┐
+│                   MCP Vertical Bundle                   │
+│                                                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
+│  │  GitHub MCP  │  │  Slack MCP  │  │ Notion MCP  │     │
+│  │             │  │             │  │             │     │
+│  │ 5 tools     │  │ 5 tools     │  │ 5 tools     │     │
+│  │ list_repos  │  │ list_chan.  │  │ search_pg.  │     │
+│  │ search_iss. │  │ read_msgs  │  │ read_page   │     │
+│  │ read_pr     │  │ post_msg   │  │ query_db    │     │
+│  │ create_iss. │  │ list_users │  │ create_pg   │     │
+│  │ get_file    │  │ search_msg │  │ list_dbs    │     │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘     │
+│         │                │                │             │
+│         └────────────────┼────────────────┘             │
+│                          │                              │
+│              ┌───────────┴───────────┐                  │
+│              │  @modelcontextprotocol │                  │
+│              │       /sdk            │                  │
+│              └───────────────────────┘                  │
+└─────────────────────────────────────────────────────────┘
 ```
+
+## What You Get
+
+- **15 MCP tools** across 3 servers -- every tool uses Zod validation and proper error handling
+- **Real API integrations** -- not stubs. Uses `@octokit/rest`, `@slack/web-api`, `@notionhq/client`
+- **Stdio transport** -- works with Claude Desktop, Cursor, Cline, and any MCP-compatible client
+- **Docker support** -- `docker compose up` runs all 3 servers
+- **TypeScript strict mode** -- full type safety, declaration files, source maps
 
 ---
 
 ## Quick Start
 
-### 1. Install dependencies
+### 1. Clone and install
 
 ```bash
+git clone https://github.com/srmcguirt/mcp-vertical-bundle.git
+cd mcp-vertical-bundle
 npm install
 ```
 
-### 2. Build all servers
+### 2. Configure API keys
 
 ```bash
-npm run build
-```
-
-Or build individually:
-
-```bash
-npm run build:github
-npm run build:slack
-npm run build:notion
-```
-
-### 3. Configure environment variables
-
-Each server requires its own API token. Copy the example env file in each server directory and add your credentials:
-
-```bash
+# GitHub
 cp servers/github-mcp/.env.example servers/github-mcp/.env
+# Edit: add your GitHub Personal Access Token
+
+# Slack
 cp servers/slack-mcp/.env.example servers/slack-mcp/.env
+# Edit: add your Slack Bot Token
+
+# Notion
 cp servers/notion-mcp/.env.example servers/notion-mcp/.env
+# Edit: add your Notion Integration Token
 ```
 
-Edit each `.env` file with your API tokens:
+### 3. Build
 
-- **GitHub**: Personal access token with `repo` scope
-- **Slack**: Bot token (`xoxb-`) with appropriate scopes
-- **Notion**: Internal integration token
+```bash
+npm run build  # Builds all 3 servers
+```
 
-### 4. Connect to your MCP client
+### 4. Add to Claude Desktop
 
-See the configuration examples below for Claude Desktop, Cursor, and Cline.
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "node",
+      "args": ["<path>/servers/github-mcp/dist/index.js"],
+      "env": { "GITHUB_TOKEN": "ghp_..." }
+    },
+    "slack": {
+      "command": "node",
+      "args": ["<path>/servers/slack-mcp/dist/index.js"],
+      "env": { "SLACK_BOT_TOKEN": "xoxb-..." }
+    },
+    "notion": {
+      "command": "node",
+      "args": ["<path>/servers/notion-mcp/dist/index.js"],
+      "env": { "NOTION_API_KEY": "secret_..." }
+    }
+  }
+}
+```
+
+### 5. Use with Cursor
+
+Add to `.cursor/mcp.json` in your project:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "node",
+      "args": ["<path>/servers/github-mcp/dist/index.js"],
+      "env": { "GITHUB_TOKEN": "ghp_..." }
+    }
+  }
+}
+```
 
 ---
 
@@ -83,158 +120,140 @@ See the configuration examples below for Claude Desktop, Cursor, and Cline.
 
 ### GitHub MCP Server
 
-Interact with GitHub repositories, issues, and pull requests directly from your AI assistant.
+Connect AI to your GitHub repos, issues, and pull requests.
 
-**Tools:** `list_repos`, `search_issues`, `read_pr`, `create_issue`
+| Tool | Description |
+|------|-------------|
+| `list_repos` | List repos by user/org with stars, language, activity |
+| `search_issues` | Full GitHub search syntax (`is:open label:bug repo:...`) |
+| `read_pr` | PR details, changed files, diff stats, reviews |
+| `create_issue` | Create issues with labels, assignees, milestones |
+| `get_file_contents` | Read files or directory listings from any branch |
 
-See [servers/github-mcp/README.md](servers/github-mcp/README.md) for full documentation.
+**Token**: [github.com/settings/tokens](https://github.com/settings/tokens) -- scopes: `repo`, `read:org`
 
 ### Slack MCP Server
 
-Search, read, and post messages across your Slack workspace without leaving your editor.
+Connect AI to your Slack workspace.
 
-**Tools:** `search_channels`, `read_messages`, `post_message`, `list_users`
+| Tool | Description |
+|------|-------------|
+| `list_channels` | Channels with topic, purpose, member count |
+| `read_messages` | Recent messages with optional thread replies |
+| `post_message` | Send messages with mrkdwn formatting |
+| `list_users` | Workspace members with roles, timezone, status |
+| `search_messages` | Cross-channel search with Slack modifiers |
 
-See [servers/slack-mcp/README.md](servers/slack-mcp/README.md) for full documentation.
+**Token**: [api.slack.com/apps](https://api.slack.com/apps) -- scopes: `channels:read`, `channels:history`, `chat:write`, `users:read`, `search:read`
 
 ### Notion MCP Server
 
-Query databases, search pages, and create content in your Notion workspace programmatically.
+Connect AI to your Notion workspace.
 
-**Tools:** `search_pages`, `read_database`, `create_page`, `query_database`
+| Tool | Description |
+|------|-------------|
+| `search_pages` | Search pages/databases by title or content |
+| `read_page` | Page content as text (headings, lists, code, todos) |
+| `query_database` | Query with filters and sorts, returns typed values |
+| `create_page` | Create pages in databases or under pages |
+| `list_databases` | Databases with their property schemas |
 
-See [servers/notion-mcp/README.md](servers/notion-mcp/README.md) for full documentation.
-
----
-
-## Client Configuration
-
-### Claude Desktop
-
-Add the following to your Claude Desktop configuration file (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
-
-```json
-{
-  "mcpServers": {
-    "wireforge-github": {
-      "command": "node",
-      "args": ["servers/github-mcp/dist/index.js"],
-      "cwd": "/path/to/mcp-vertical-bundle",
-      "env": {
-        "GITHUB_TOKEN": "ghp_your_token_here"
-      }
-    },
-    "wireforge-slack": {
-      "command": "node",
-      "args": ["servers/slack-mcp/dist/index.js"],
-      "cwd": "/path/to/mcp-vertical-bundle",
-      "env": {
-        "SLACK_BOT_TOKEN": "xoxb-your-token-here"
-      }
-    },
-    "wireforge-notion": {
-      "command": "node",
-      "args": ["servers/notion-mcp/dist/index.js"],
-      "cwd": "/path/to/mcp-vertical-bundle",
-      "env": {
-        "NOTION_TOKEN": "ntn_your_token_here"
-      }
-    }
-  }
-}
-```
-
-### Cursor
-
-Add to your Cursor MCP settings (`.cursor/mcp.json` in your project root or global settings):
-
-```json
-{
-  "mcpServers": {
-    "wireforge-github": {
-      "command": "node",
-      "args": ["/path/to/mcp-vertical-bundle/servers/github-mcp/dist/index.js"],
-      "env": {
-        "GITHUB_TOKEN": "ghp_your_token_here"
-      }
-    },
-    "wireforge-slack": {
-      "command": "node",
-      "args": ["/path/to/mcp-vertical-bundle/servers/slack-mcp/dist/index.js"],
-      "env": {
-        "SLACK_BOT_TOKEN": "xoxb-your-token-here"
-      }
-    },
-    "wireforge-notion": {
-      "command": "node",
-      "args": ["/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
-      "env": {
-        "NOTION_TOKEN": "ntn_your_token_here"
-      }
-    }
-  }
-}
-```
-
-### Cline
-
-Add to your Cline MCP settings (accessible via Cline settings panel in VS Code):
-
-```json
-{
-  "mcpServers": {
-    "wireforge-github": {
-      "command": "node",
-      "args": ["/path/to/mcp-vertical-bundle/servers/github-mcp/dist/index.js"],
-      "env": {
-        "GITHUB_TOKEN": "ghp_your_token_here"
-      }
-    },
-    "wireforge-slack": {
-      "command": "node",
-      "args": ["/path/to/mcp-vertical-bundle/servers/slack-mcp/dist/index.js"],
-      "env": {
-        "SLACK_BOT_TOKEN": "xoxb-your-token-here"
-      }
-    },
-    "wireforge-notion": {
-      "command": "node",
-      "args": ["/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
-      "env": {
-        "NOTION_TOKEN": "ntn_your_token_here"
-      }
-    }
-  }
-}
-```
+**Token**: [notion.so/my-integrations](https://www.notion.so/my-integrations) -- share pages with your integration
 
 ---
 
-## Requirements
+## Docker
 
-- **Node.js** 18 or later
-- **npm** 9 or later
-- **API Tokens** for each service you intend to use:
-  - GitHub: [Create a personal access token](https://github.com/settings/tokens)
-  - Slack: [Create a Slack app and bot token](https://api.slack.com/apps)
-  - Notion: [Create an internal integration](https://www.notion.so/my-integrations)
-
-You do not need all three tokens to get started. Each server operates independently -- configure only the ones you need.
-
----
-
-## Docker (Optional)
-
-A `docker-compose.yml` is included for building and testing the servers in containers. Note that MCP servers communicate via stdio, so Docker is primarily useful for CI and build verification rather than production use.
+Run all 3 servers with Docker Compose:
 
 ```bash
-docker compose build
+# Build and start
+docker compose up -d
+
+# Check status
+docker compose ps
+
+# Stop
+docker compose down
 ```
 
-See the comments in `docker-compose.yml` for details.
+---
+
+## Project Structure
+
+```
+mcp-vertical-bundle/
+  docker-compose.yml        # Run all servers
+  package.json              # Workspace root
+  servers/
+    github-mcp/
+      src/
+        index.ts            # MCP server entry point
+        tools/
+          list-repos.ts
+          search-issues.ts
+          read-pr.ts
+          create-issue.ts
+          get-file-contents.ts
+      package.json
+      .env.example
+      Dockerfile
+    slack-mcp/
+      src/
+        index.ts
+        tools/
+          list-channels.ts
+          read-messages.ts
+          post-message.ts
+          list-users.ts
+          search-messages.ts
+      package.json
+      .env.example
+      Dockerfile
+    notion-mcp/
+      src/
+        index.ts
+        tools/
+          search-pages.ts
+          read-page.ts
+          query-database.ts
+          create-page.ts
+          list-databases.ts
+      package.json
+      .env.example
+      Dockerfile
+```
+
+---
+
+## Extending
+
+Each server follows the same pattern. To add a new tool:
+
+```typescript
+// 1. Define the schema with Zod
+export const myToolSchema = z.object({
+  param: z.string().describe('What this param does'),
+});
+
+// 2. Implement the handler
+export async function myTool(client: ApiClient, input: MyToolInput): Promise<string> {
+  const result = await client.doSomething(input.param);
+  return JSON.stringify(result);
+}
+
+// 3. Register with the MCP server (in index.ts)
+server.tool('my_tool', 'Description', myToolSchema.shape, async (args) => {
+  const input = myToolSchema.parse(args);
+  const result = await myTool(client, input);
+  return { content: [{ type: 'text', text: result }] };
+});
+```
 
 ---
 
 ## License
 
-MIT License. Copyright 2024 WireForge. See [LICENSE](LICENSE) for details.
+MIT -- see [LICENSE](./LICENSE).
+
+Built by [WireForge](https://srmcguirt.gumroad.com).

@@ -4,37 +4,54 @@ import type { Client } from "@notionhq/client";
 export const toolDefinition = {
   name: "notion_query_database",
   description:
-    "Query a Notion database with optional filters and sorts. Returns pages (rows) " +
-    "from the database with their property values extracted into a readable format. " +
-    "Supports the full Notion filter syntax for complex queries (compound filters with " +
-    "and/or, property-specific filters for text, number, date, select, etc.). " +
-    "Also supports multi-column sorting and pagination. Use notion_read_database first " +
-    "to discover the available properties and their types before building filters.",
+    "Query a Notion database with filters and sorting. " +
+    "Returns matching pages/entries with their property values. " +
+    "Supports filtering by property values (equals, contains, greater_than, etc.) " +
+    "and sorting by any property or timestamp. Use notion_read_database first to " +
+    "understand the database schema and available properties before querying. " +
+    "Results include page IDs, titles, URLs, and all property values.",
   inputSchema: {
     type: "object" as const,
     properties: {
       database_id: {
         type: "string",
-        description:
-          "The ID of the Notion database to query. Can be a UUID with or without dashes.",
+        description: "The ID of the Notion database to query.",
       },
       filter: {
         type: "object",
         description:
-          "A Notion filter object. Supports compound filters (and/or) and property filters. " +
-          'Example: {"property": "Status", "select": {"equals": "Done"}}. ' +
-          "See Notion API docs for the full filter syntax. Optional.",
+          "A Notion filter object. Simple example: " +
+          '{"property": "Status", "select": {"equals": "Done"}}. ' +
+          "Compound example: " +
+          '{"and": [{"property": "Status", "select": {"equals": "In Progress"}}, ' +
+          '{"property": "Priority", "number": {"greater_than": 2}}]}. ' +
+          "Supported filter types per property: select (equals/does_not_equal), " +
+          "multi_select (contains/does_not_contain), rich_text/title (equals/contains/starts_with/is_empty), " +
+          "number (equals/greater_than/less_than/greater_than_or_equal_to/less_than_or_equal_to), " +
+          "checkbox (equals), date (equals/before/after/on_or_before/on_or_after), " +
+          "status (equals/does_not_equal).",
         additionalProperties: true,
       },
       sorts: {
         type: "array",
         description:
-          "Array of sort objects. Each sort specifies a property name and direction. " +
-          'Example: [{"property": "Created", "direction": "descending"}]. ' +
-          'You can also sort by timestamp: [{"timestamp": "last_edited_time", "direction": "ascending"}]. Optional.',
+          "Array of sort objects. Each sort: " +
+          '{"property": "Name", "direction": "ascending"} or ' +
+          '{"timestamp": "created_time", "direction": "descending"}.',
         items: {
           type: "object",
-          additionalProperties: true,
+          properties: {
+            property: { type: "string" },
+            timestamp: {
+              type: "string",
+              enum: ["created_time", "last_edited_time"],
+            },
+            direction: {
+              type: "string",
+              enum: ["ascending", "descending"],
+            },
+          },
+          required: ["direction"],
         },
       },
       page_size: {
@@ -53,175 +70,125 @@ export const toolDefinition = {
   },
 };
 
+const SortSchema = z.object({
+  property: z.string().optional(),
+  timestamp: z.enum(["created_time", "last_edited_time"]).optional(),
+  direction: z.enum(["ascending", "descending"]),
+});
+
 const ArgsSchema = z.object({
   database_id: z.string().min(1, "Database ID is required"),
-  filter: z.record(z.string(), z.unknown()).optional(),
-  sorts: z.array(z.record(z.string(), z.unknown())).optional(),
+  filter: z.record(z.unknown()).optional(),
+  sorts: z.array(SortSchema).optional(),
   page_size: z.number().min(1).max(100).default(10),
   start_cursor: z.string().optional(),
 });
 
-function extractPropertyValue(
-  name: string,
-  prop: Record<string, unknown>,
-): string {
-  const type = prop.type as string;
-
-  switch (type) {
-    case "title": {
-      const titleArray = prop.title as
+function extractTitle(properties: Record<string, unknown>): string {
+  for (const prop of Object.values(properties)) {
+    const p = prop as Record<string, unknown>;
+    if (p.type === "title") {
+      const titleArray = p.title as
         | Array<{ plain_text: string }>
         | undefined;
       if (titleArray && titleArray.length > 0) {
         return titleArray.map((t) => t.plain_text).join("");
       }
-      return "";
+    }
+  }
+  return "(untitled)";
+}
+
+function formatPropertyValue(prop: Record<string, unknown>): string {
+  const propType = prop.type as string;
+
+  switch (propType) {
+    case "title": {
+      const arr = prop.title as Array<{ plain_text: string }> | undefined;
+      return arr ? arr.map((t) => t.plain_text).join("") : "";
     }
     case "rich_text": {
-      const textArray = prop.rich_text as
+      const arr = prop.rich_text as
         | Array<{ plain_text: string }>
         | undefined;
-      if (textArray && textArray.length > 0) {
-        return textArray.map((t) => t.plain_text).join("");
-      }
-      return "";
+      return arr ? arr.map((t) => t.plain_text).join("") : "";
     }
-    case "number": {
-      const num = prop.number;
-      return num !== null && num !== undefined ? String(num) : "";
-    }
+    case "number":
+      return prop.number != null ? String(prop.number) : "";
     case "select": {
-      const select = prop.select as { name: string } | null;
-      return select?.name ?? "";
+      const sel = prop.select as { name: string } | null;
+      return sel ? sel.name : "";
     }
     case "multi_select": {
-      const multiSelect = prop.multi_select as
-        | Array<{ name: string }>
-        | undefined;
-      if (multiSelect && multiSelect.length > 0) {
-        return multiSelect.map((s) => s.name).join(", ");
-      }
-      return "";
-    }
-    case "date": {
-      const date = prop.date as
-        | { start: string; end?: string | null }
-        | null;
-      if (!date) return "";
-      return date.end ? `${date.start} to ${date.end}` : date.start;
-    }
-    case "checkbox": {
-      return prop.checkbox ? "true" : "false";
-    }
-    case "url": {
-      return (prop.url as string) ?? "";
-    }
-    case "email": {
-      return (prop.email as string) ?? "";
-    }
-    case "phone_number": {
-      return (prop.phone_number as string) ?? "";
+      const items = prop.multi_select as Array<{ name: string }> | undefined;
+      return items ? items.map((i) => i.name).join(", ") : "";
     }
     case "status": {
       const status = prop.status as { name: string } | null;
-      return status?.name ?? "";
+      return status ? status.name : "";
     }
+    case "date": {
+      const date = prop.date as
+        | { start: string; end?: string }
+        | null;
+      if (!date) return "";
+      return date.end ? `${date.start} -> ${date.end}` : date.start;
+    }
+    case "checkbox":
+      return prop.checkbox ? "true" : "false";
+    case "url":
+      return (prop.url as string) ?? "";
+    case "email":
+      return (prop.email as string) ?? "";
+    case "phone_number":
+      return (prop.phone_number as string) ?? "";
     case "people": {
       const people = prop.people as
         | Array<{ name?: string; id: string }>
         | undefined;
-      if (people && people.length > 0) {
-        return people.map((p) => p.name ?? p.id).join(", ");
-      }
-      return "";
+      return people ? people.map((p) => p.name ?? p.id).join(", ") : "";
     }
     case "relation": {
-      const relations = prop.relation as
-        | Array<{ id: string }>
-        | undefined;
-      if (relations && relations.length > 0) {
-        return relations.map((r) => r.id).join(", ");
-      }
-      return "";
+      const relations = prop.relation as Array<{ id: string }> | undefined;
+      return relations ? relations.map((r) => r.id).join(", ") : "";
     }
     case "formula": {
       const formula = prop.formula as Record<string, unknown> | undefined;
       if (!formula) return "";
-      const formulaType = formula.type as string;
-      if (formulaType === "string") return (formula.string as string) ?? "";
-      if (formulaType === "number")
-        return formula.number !== null ? String(formula.number) : "";
-      if (formulaType === "boolean") return String(formula.boolean ?? "");
-      if (formulaType === "date") {
-        const fDate = formula.date as
-          | { start: string; end?: string | null }
-          | null;
-        if (!fDate) return "";
-        return fDate.end ? `${fDate.start} to ${fDate.end}` : fDate.start;
-      }
-      return JSON.stringify(formula);
+      const fType = formula.type as string;
+      return String(formula[fType] ?? "");
     }
     case "rollup": {
       const rollup = prop.rollup as Record<string, unknown> | undefined;
       if (!rollup) return "";
-      const rollupType = rollup.type as string;
-      if (rollupType === "number")
-        return rollup.number !== null ? String(rollup.number) : "";
-      if (rollupType === "date") {
-        const rDate = rollup.date as
-          | { start: string; end?: string | null }
-          | null;
-        if (!rDate) return "";
-        return rDate.end ? `${rDate.start} to ${rDate.end}` : rDate.start;
-      }
-      if (rollupType === "array") {
+      const rType = rollup.type as string;
+      if (rType === "array") {
         const arr = rollup.array as Array<Record<string, unknown>> | undefined;
-        if (arr && arr.length > 0) {
-          return arr
-            .map((item) => extractPropertyValue("", item))
-            .filter(Boolean)
-            .join(", ");
-        }
-        return "";
+        return arr
+          ? arr.map((item) => formatPropertyValue(item)).join(", ")
+          : "";
       }
-      return JSON.stringify(rollup);
+      return String(rollup[rType] ?? "");
     }
-    case "created_time": {
+    case "created_time":
       return (prop.created_time as string) ?? "";
-    }
-    case "created_by": {
-      const createdBy = prop.created_by as
-        | { name?: string; id: string }
-        | undefined;
-      return createdBy?.name ?? createdBy?.id ?? "";
-    }
-    case "last_edited_time": {
+    case "last_edited_time":
       return (prop.last_edited_time as string) ?? "";
-    }
+    case "created_by":
     case "last_edited_by": {
-      const editedBy = prop.last_edited_by as
+      const user = prop[propType] as
         | { name?: string; id: string }
         | undefined;
-      return editedBy?.name ?? editedBy?.id ?? "";
+      return user ? user.name ?? user.id : "";
     }
     case "files": {
       const files = prop.files as
         | Array<{ name: string; type: string }>
         | undefined;
-      if (files && files.length > 0) {
-        return files.map((f) => f.name).join(", ");
-      }
-      return "";
-    }
-    case "unique_id": {
-      const uid = prop.unique_id as
-        | { prefix?: string | null; number: number }
-        | undefined;
-      if (!uid) return "";
-      return uid.prefix ? `${uid.prefix}-${uid.number}` : String(uid.number);
+      return files ? files.map((f) => f.name).join(", ") : "";
     }
     default:
-      return `(${type})`;
+      return `[${propType}]`;
   }
 }
 
@@ -259,20 +226,20 @@ export async function handler(
         Record<string, unknown>
       >;
 
-      const readableProps: Record<string, string> = {};
-      for (const [propName, propValue] of Object.entries(properties)) {
-        const extracted = extractPropertyValue(propName, propValue);
-        if (extracted !== "") {
-          readableProps[propName] = extracted;
-        }
+      const title = extractTitle(properties);
+
+      const formattedProps: Record<string, string> = {};
+      for (const [key, prop] of Object.entries(properties)) {
+        formattedProps[key] = formatPropertyValue(prop);
       }
 
       return {
         id: page.id as string,
+        title,
         url: page.url as string,
         created_time: page.created_time as string,
         last_edited_time: page.last_edited_time as string,
-        properties: readableProps,
+        properties: formattedProps,
       };
     });
 
@@ -283,16 +250,18 @@ export async function handler(
     const text =
       results.length === 0
         ? "No results found matching the query."
-        : `Found ${results.length} results:\n\n${results
+        : `Found ${results.length} result(s):\n\n${results
             .map((r) => {
               const propLines = Object.entries(r.properties)
-                .map(([key, val]) => `    ${key}: ${val}`)
+                .filter(([, v]) => v !== "")
+                .map(([k, v]) => `  ${k}: ${v}`)
                 .join("\n");
               return (
+                `**${r.title}**\n` +
                 `  ID: ${r.id}\n` +
                 `  URL: ${r.url}\n` +
                 `  Created: ${r.created_time} | Last edited: ${r.last_edited_time}\n` +
-                `  Properties:\n${propLines}`
+                propLines
               );
             })
             .join("\n\n")}${paginationInfo}`;

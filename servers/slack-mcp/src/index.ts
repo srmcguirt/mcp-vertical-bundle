@@ -23,6 +23,14 @@ import {
   toolDefinition as listUsersDefinition,
   handler as listUsersHandler,
 } from "./tools/list-users.js";
+import {
+  listChannelsSchema,
+  listChannels,
+} from "./tools/list-channels.js";
+import {
+  searchMessagesSchema,
+  searchMessages,
+} from "./tools/search-messages.js";
 
 // Load environment variables
 dotenv.config();
@@ -40,12 +48,89 @@ if (!token) {
 // Initialize Slack client
 const client = new WebClient(token);
 
+// Additional tool definitions for tools that use Zod-schema exports
+const listChannelsDefinition = {
+  name: "slack_list_channels",
+  description:
+    "List Slack channels the bot has access to. " +
+    "Returns channel metadata including ID, name, topic, purpose, member count, and privacy/archive status. " +
+    "Supports filtering by channel type and pagination via cursor.",
+  inputSchema: {
+    type: "object" as const,
+    properties: {
+      types: {
+        type: "string",
+        description:
+          'Comma-separated channel types: public_channel, private_channel, mpim, im. Default: "public_channel".',
+      },
+      limit: {
+        type: "number",
+        description: "Max channels to return (1-200). Default: 50.",
+        minimum: 1,
+        maximum: 200,
+      },
+      cursor: {
+        type: "string",
+        description: "Pagination cursor from a previous response.",
+      },
+      exclude_archived: {
+        type: "boolean",
+        description: "Exclude archived channels. Default: true.",
+      },
+    },
+    required: [],
+  },
+};
+
+const searchMessagesDefinition = {
+  name: "slack_search_messages",
+  description:
+    "Search Slack messages across channels. " +
+    "Supports Slack search modifiers (from:, in:, has:, before:, after:). " +
+    "Note: requires a user token (xoxp-) with search:read scope. " +
+    "Returns matching messages with text, user, channel, and permalink.",
+  inputSchema: {
+    type: "object" as const,
+    properties: {
+      query: {
+        type: "string",
+        description:
+          "Search query. Supports Slack search modifiers (from:, in:, has:, before:, after:).",
+      },
+      sort: {
+        type: "string",
+        enum: ["score", "timestamp"],
+        description: 'Sort by relevance or recency. Default: "score".',
+      },
+      sort_dir: {
+        type: "string",
+        enum: ["asc", "desc"],
+        description: 'Sort direction. Default: "desc".',
+      },
+      count: {
+        type: "number",
+        description: "Number of results to return (1-100). Default: 20.",
+        minimum: 1,
+        maximum: 100,
+      },
+      page: {
+        type: "number",
+        description: "Page number. Default: 1.",
+        minimum: 1,
+      },
+    },
+    required: ["query"],
+  },
+};
+
 // Tool registry
 const tools = [
   searchChannelsDefinition,
   readMessagesDefinition,
   postMessageDefinition,
   listUsersDefinition,
+  listChannelsDefinition,
+  searchMessagesDefinition,
 ];
 
 const handlers: Record<
@@ -83,21 +168,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  const handler = handlers[name];
-  if (!handler) {
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: `Unknown tool: "${name}". Available tools: ${tools.map((t) => t.name).join(", ")}`,
-        },
-      ],
-      isError: true,
-    };
-  }
-
   try {
-    return await handler(client, args ?? {});
+    // Check registry-based handlers first
+    const registeredHandler = handlers[name];
+    if (registeredHandler) {
+      return await registeredHandler(client, args ?? {});
+    }
+
+    // Handle Zod-schema-based tools
+    switch (name) {
+      case "slack_list_channels": {
+        const validated = listChannelsSchema.parse(args);
+        const result = await listChannels(client, validated);
+        return { content: [{ type: "text" as const, text: result }] };
+      }
+
+      case "slack_search_messages": {
+        const validated = searchMessagesSchema.parse(args);
+        const result = await searchMessages(client, validated);
+        return { content: [{ type: "text" as const, text: result }] };
+      }
+
+      default:
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Unknown tool: "${name}". Available tools: ${tools.map((t) => t.name).join(", ")}`,
+            },
+          ],
+          isError: true,
+        };
+    }
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";

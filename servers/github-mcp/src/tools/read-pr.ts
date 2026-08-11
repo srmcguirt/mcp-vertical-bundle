@@ -46,7 +46,7 @@ export async function readPr(octokit: Octokit, input: ReadPrInput): Promise<stri
     html_url: pr.html_url,
     body: pr.body,
     labels: pr.labels.map(l => l.name),
-    requested_reviewers: pr.requested_reviewers?.map(r => ('login' in r ? r.login : r.name)),
+    requested_reviewers: pr.requested_reviewers?.map(r => ('login' in r ? r.login : (r as { name?: string }).name)),
   };
 
   // Optionally include changed files
