@@ -32,14 +32,14 @@ npm start
 
 ```json
 {
-  "mcpServers": {
-    "slack": {
-      "command": "node",
-      "args": ["/path/to/servers/slack-mcp/dist/index.js"],
-      "env": {
-        "SLACK_BOT_TOKEN": "xoxb-your-token-here"
-      }
-    }
-  }
+ "mcpServers": {
+ "slack": {
+ "command": "node",
+ "args": ["/path/to/servers/slack-mcp/dist/index.js"],
+ "env": {
+ "SLACK_BOT_TOKEN": "xoxb-your-token-here"
+ }
+ }
+ }
 }
 ```

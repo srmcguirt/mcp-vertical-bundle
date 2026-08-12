@@ -1,7 +1,7 @@
 {
-  "name": "@wireforge/mcp-vertical-bundle",
+  "name": "@srmcguirt/mcp-vertical-bundle",
   "version": "1.0.0",
-  "description": "WireForge MCP Vertical Server Bundle — production-ready MCP servers for GitHub, Slack, and Notion",
+  "description": "MCP Vertical Server Bundle — production-ready MCP servers for GitHub, Slack, and Notion",
   "author": "WireForge",
   "license": "MIT",
   "private": true,

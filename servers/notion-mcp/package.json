@@ -1,5 +1,5 @@
 {
-  "name": "@wireforge/notion-mcp",
+  "name": "@srmcguirt/notion-mcp",
   "version": "1.0.0",
   "description": "MCP server for Notion — pages, databases, search, create",
   "type": "module",
