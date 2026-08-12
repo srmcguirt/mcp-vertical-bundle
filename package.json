@@ -1,8 +1,8 @@
 {
   "name": "@srmcguirt/mcp-vertical-bundle",
   "version": "1.0.0",
-  "description": "MCP Vertical Server Bundle — production-ready MCP servers for GitHub, Slack, and Notion",
-  "author": "WireForge",
+  "description": "MCP Vertical Server Bundle \u2014 production-ready MCP servers for GitHub, Slack, and Notion",
+  "author": "Shane McGuirt",
   "license": "MIT",
   "private": true,
   "workspaces": [
