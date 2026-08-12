@@ -305,7 +305,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("WireForge GitHub MCP server running on stdio");
+  console.error("GitHub MCP server running on stdio");
 }
 
 main().catch((error) => {

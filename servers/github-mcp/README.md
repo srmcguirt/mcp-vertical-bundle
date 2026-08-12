@@ -1,4 +1,4 @@
-# WireForge GitHub MCP Server
+# GitHub MCP Server
 
 MCP server that connects Claude, Cursor, and other AI tools to GitHub.
 
