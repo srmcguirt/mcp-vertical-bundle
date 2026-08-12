@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/srmcguirt/mcp-vertical-bundle/actions/workflows/ci.yml/badge.svg)](https://github.com/srmcguirt/mcp-vertical-bundle/actions/workflows/ci.yml) ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white) ![Node](https://img.shields.io/badge/Node-%3E%3D18-339933?logo=node.js&logoColor=white) ![MCP](https://img.shields.io/badge/MCP-Compatible-8A2BE2) ![Servers](https://img.shields.io/badge/Servers-3-green)
 
-3 production-ready MCP servers that connect Claude, Cursor, and any MCP client to **GitHub**, **Slack**, and **Notion** -- ready to deploy in under 5 minutes.
+Production-ready MCP servers connecting Claude, Cursor, and any MCP client to **GitHub**, **Slack**, and **Notion**.
+
+> The **GitHub server is free and complete** in this repo -- real `@octokit/rest` integration, not a stub. The Slack and Notion servers, plus the Docker Compose setup, ship with the [full bundle](https://srmcguirt.gumroad.com/l/mcp-vertical-bundle).
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -55,12 +57,8 @@ npm install
 cp servers/github-mcp/.env.example servers/github-mcp/.env
 # Edit: add your GitHub Personal Access Token
 
-# Slack
-cp servers/slack-mcp/.env.example servers/slack-mcp/.env
 # Edit: add your Slack Bot Token
 
-# Notion
-cp servers/notion-mcp/.env.example servers/notion-mcp/.env
 # Edit: add your Notion Integration Token
 ```
 
@@ -83,11 +81,13 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
       "env": { "GITHUB_TOKEN": "ghp_..." }
     },
     "slack": {
+      "_comment": "full bundle only — servers/slack-mcp is not in this repo",
       "command": "node",
       "args": ["<path>/servers/slack-mcp/dist/index.js"],
       "env": { "SLACK_BOT_TOKEN": "xoxb-..." }
     },
     "notion": {
+      "_comment": "full bundle only — servers/notion-mcp is not in this repo",
       "command": "node",
       "args": ["<path>/servers/notion-mcp/dist/index.js"],
       "env": { "NOTION_API_KEY": "secret_..." }

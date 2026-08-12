@@ -6,15 +6,11 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "servers/github-mcp",
-    "servers/slack-mcp",
-    "servers/notion-mcp"
+    "servers/github-mcp"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "build:github": "npm run build --workspace=servers/github-mcp",
-    "build:slack": "npm run build --workspace=servers/slack-mcp",
-    "build:notion": "npm run build --workspace=servers/notion-mcp"
+    "build:github": "npm run build --workspace=servers/github-mcp"
   },
   "repository": {
     "type": "git",
