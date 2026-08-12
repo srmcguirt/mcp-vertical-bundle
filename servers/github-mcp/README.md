@@ -30,14 +30,14 @@ npm start
 
 ```json
 {
- "mcpServers": {
- "github": {
- "command": "node",
- "args": ["/path/to/servers/github-mcp/dist/index.js"],
- "env": {
- "GITHUB_TOKEN": "ghp_your_token_here"
- }
- }
- }
+  "mcpServers": {
+    "github": {
+      "command": "node",
+      "args": ["/path/to/servers/github-mcp/dist/index.js"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your_token_here"
+      }
+    }
+  }
 }
 ```

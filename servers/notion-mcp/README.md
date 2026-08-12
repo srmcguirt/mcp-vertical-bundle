@@ -28,14 +28,14 @@ Part of the [MCP Vertical Bundle](https://github.com/srmcguirt/mcp-vertical-bund
 2. Click **New integration**
 3. Name your integration and select the workspace
 4. Under **Capabilities**, ensure the following are enabled:
- - Read content
- - Insert content
- - Update content (optional, for future use)
+   - Read content
+   - Insert content
+   - Update content (optional, for future use)
 5. Copy the **Internal Integration Secret** (`secret_...`)
 6. **Share pages/databases** with your integration:
- - Open any page or database in Notion
- - Click the **...** menu > **Connections** > select your integration
- - The integration can only access pages explicitly shared with it
+   - Open any page or database in Notion
+   - Click the **...** menu > **Connections** > select your integration
+   - The integration can only access pages explicitly shared with it
 
 ---
 
@@ -63,15 +63,15 @@ Add to your `claude_desktop_config.json`:
 
 ```json
 {
- "mcpServers": {
- "srmcguirt-notion": {
- "command": "node",
- "args": ["/absolute/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
- "env": {
- "NOTION_API_KEY": "secret_your_key_here"
- }
- }
- }
+  "mcpServers": {
+    "srmcguirt-notion": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
+      "env": {
+        "NOTION_API_KEY": "secret_your_key_here"
+      }
+    }
+  }
 }
 ```
 
@@ -85,15 +85,15 @@ Add to your Cursor MCP settings (`.cursor/mcp.json` in your project root or glob
 
 ```json
 {
- "mcpServers": {
- "srmcguirt-notion": {
- "command": "node",
- "args": ["/absolute/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
- "env": {
- "NOTION_API_KEY": "secret_your_key_here"
- }
- }
- }
+  "mcpServers": {
+    "srmcguirt-notion": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
+      "env": {
+        "NOTION_API_KEY": "secret_your_key_here"
+      }
+    }
+  }
 }
 ```
 
@@ -103,16 +103,16 @@ Add to your Cline MCP settings (`cline_mcp_settings.json`):
 
 ```json
 {
- "mcpServers": {
- "srmcguirt-notion": {
- "command": "node",
- "args": ["/absolute/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
- "env": {
- "NOTION_API_KEY": "secret_your_key_here"
- },
- "disabled": false
- }
- }
+  "mcpServers": {
+    "srmcguirt-notion": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-vertical-bundle/servers/notion-mcp/dist/index.js"],
+      "env": {
+        "NOTION_API_KEY": "secret_your_key_here"
+      },
+      "disabled": false
+    }
+  }
 }
 ```
 
