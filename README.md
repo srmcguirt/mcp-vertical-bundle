@@ -250,8 +250,29 @@ server.tool('my_tool', 'Description', myToolSchema.shape, async (args) => {
 
 ---
 
+---
+
+## 💼 Get the Full Bundle
+
+This repo contains the open-source core. The full **MCP Vertical Server Bundle** on Gumroad includes:
+- All 3 production MCP servers (GitHub, Slack, Notion) — 15 tools, Zod-validated
+- Multi-server Docker Compose orchestration
+- Extended configuration guide + Claude Desktop / Cursor setup
+- MIT licensed — use in any project
+
+**[$99 on Gumroad → srmcguirt.gumroad.com/l/mcp-vertical-bundle](https://srmcguirt.gumroad.com/l/mcp-vertical-bundle)**
+
+Related tools:
+- [MCP Server Starter Kit](https://srmcguirt.gumroad.com/l/mcp-starter) — build your own MCP server (TypeScript, free core)
+- [FastMCP Python Boilerplate](https://srmcguirt.gumroad.com/l/fastmcp-python) — Python MCP server with rate limiting ($35)
+- [Multi-Agent Orchestration Kit](https://srmcguirt.gumroad.com/l/multi-agent-kit) — pipeline, fan-out, supervisor patterns ($79)
+- [Claude Agent Boilerplate](https://srmcguirt.gumroad.com/l/claude-agent) — tool-use loop with memory + streaming ($29)
+
+→ Full lineup: [wireforge.fellwork.workers.dev](https://wireforge.fellwork.workers.dev)
+
+
 ## License
 
 MIT -- see [LICENSE](./LICENSE).
 
-Built by [WireForge](https://srmcguirt.gumroad.com).
+Built by [Shane McGuirt](https://srmcguirt.gumroad.com/l/mcp-vertical-bundle).
