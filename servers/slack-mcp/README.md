@@ -1,4 +1,4 @@
-# WireForge Slack MCP Server
+# Slack MCP Server
 
 MCP server that connects Claude, Cursor, and other AI tools to Slack.
 

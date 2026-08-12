@@ -219,7 +219,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("WireForge Slack MCP server running on stdio");
+  console.error("Slack MCP server running on stdio");
 }
 
 main().catch((error) => {

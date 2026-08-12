@@ -195,7 +195,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("WireForge Notion MCP server running on stdio");
+  console.error("Notion MCP server running on stdio");
 }
 
 main().catch((error) => {

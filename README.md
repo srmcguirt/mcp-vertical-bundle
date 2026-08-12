@@ -1,4 +1,4 @@
-# @wireforge/mcp-vertical-bundle
+# @srmcguirt/mcp-vertical-bundle
 
 [![CI](https://github.com/srmcguirt/mcp-vertical-bundle/actions/workflows/ci.yml/badge.svg)](https://github.com/srmcguirt/mcp-vertical-bundle/actions/workflows/ci.yml) ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white) ![Node](https://img.shields.io/badge/Node-%3E%3D18-339933?logo=node.js&logoColor=white) ![MCP](https://img.shields.io/badge/MCP-Compatible-8A2BE2) ![Servers](https://img.shields.io/badge/Servers-3-green)
 
@@ -268,7 +268,7 @@ Related tools:
 - [Multi-Agent Orchestration Kit](https://srmcguirt.gumroad.com/l/multi-agent-kit) — pipeline, fan-out, supervisor patterns ($79)
 - [Claude Agent Boilerplate](https://srmcguirt.gumroad.com/l/claude-agent) — tool-use loop with memory + streaming ($29)
 
-→ Full lineup: [wireforge.fellwork.workers.dev](https://wireforge.fellwork.workers.dev)
+→ Full lineup: [srmcguirt.dev](https://srmcguirt.dev)
 
 
 ## License

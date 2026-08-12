@@ -1,4 +1,4 @@
-# WireForge Notion MCP Server
+# Notion MCP Server
 
 An MCP (Model Context Protocol) server that provides Notion integration tools for AI assistants. Search pages, read database schemas, create pages, and query databases with filters -- all through a standardized MCP interface.
 
@@ -158,4 +158,4 @@ npm start
 
 ## License
 
-MIT -- WireForge
+MIT -- Shane McGuirt
